@@ -1,24 +1,21 @@
 using ServerController.Extensions;
 
-var builder = WebApplication.CreateBuilder(args);
-
-// Configure the builder.
-builder.AddServices(); // Services.
+var builder = WebApplication.CreateBuilder(args); // Create the builder.
+builder.ConfigureServices(); // Configure services.
 builder.ConfigureLogging(); // Configure logging.
-builder.Services.AddControllers(); // Controllers.
-builder.Services.AddEndpointsApiExplorer(); // Api description.
-builder.Services.AddSwaggerGen(); // Swagger generator.
+builder.ConfigureSwagger(); // Configure swagger.
 
 var app = builder.Build(); // Build the app.
 
-if (app.Environment.IsDevelopment()) // Use swagger in development.
+if (app.Environment.IsDevelopment()) // Set development environment specific options.
 {
-    app.UseSwagger();
+    app.UseSwagger(); // Use swagger in development.
     app.UseSwaggerUI();
 }
 
+app.UseHttpLogging(); // Use the configured http logging.
 app.UseHttpsRedirection(); // Redirect HTTP to HTTPS
 app.UseAuthorization();
 app.MapControllers(); // Map the controllers.
 
-app.Run(); // Run.
+app.Run(); // Run the application.
