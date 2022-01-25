@@ -3,9 +3,9 @@ using ServerController.Extensions;
 var builder = WebApplication.CreateBuilder(args);
 
 // Configure the builder.
+builder.AddServices(); // Services.
+builder.ConfigureLogging(); // Configure logging.
 builder.Services.AddControllers(); // Controllers.
-builder.Services.AddServices(); // Services.
-builder.Services.ConfigureLogging(); // Configure logging.
 builder.Services.AddEndpointsApiExplorer(); // Api description.
 builder.Services.AddSwaggerGen(); // Swagger generator.
 
