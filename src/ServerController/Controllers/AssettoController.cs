@@ -39,7 +39,7 @@ namespace ServerController.Controllers
         /// <returns></returns>
         /// <response code="200">All available track names and track combinations.</response>
         /// <response code="500">Internal server error</response>
-        [HttpGet(Name = nameof(Tracks))]
+        [HttpGet(Name = "AssettoCorsaTracks")]
         [ProducesResponseType(typeof(IEnumerable<string>), 200)]
         public async Task<IActionResult> Tracks()
         {
@@ -68,7 +68,7 @@ namespace ServerController.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="405">Method not allowed</response>
         /// <response code="500">Internal server error</response>
-        [HttpPost(Name = nameof(Start))]
+        [HttpPost(Name = "AssettoCorsaStart")]
         public async Task<IActionResult> Start([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] TrackConfiguration? trackConfiguration)
         {
             try
@@ -79,7 +79,8 @@ namespace ServerController.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred while starting the Assetto Corsa server");
-                return new ObjectResult(ex.Message) {
+                return new ObjectResult(ex.Message) 
+                {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
                 };
             }
@@ -94,7 +95,7 @@ namespace ServerController.Controllers
         /// <response code="400">Bad request</response>
         /// <response code="405">Method not allowed</response>
         /// <response code="500">Internal server error</response>
-        [HttpPost(Name = nameof(Restart))]
+        [HttpPost(Name = "AssettoCorsaRestart")]
         public async Task<IActionResult> Restart([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] TrackConfiguration? trackConfiguration)
         {
             try
@@ -119,7 +120,7 @@ namespace ServerController.Controllers
         /// <response code="200">Server was successfully stopped.</response>
         /// <response code="405">Method not allowed</response>
         /// <response code="500">Internal server error</response>
-        [HttpPost(Name = nameof(Stop))]
+        [HttpPost(Name = "AssettoCorsaStop")]
         public async Task<IActionResult> Stop()
         {
             try

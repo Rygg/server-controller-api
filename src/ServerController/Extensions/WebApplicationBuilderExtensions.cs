@@ -23,6 +23,7 @@ namespace ServerController.Extensions
             builder.Services.AddRouting(options => options.LowercaseUrls = true); // Use lowercase urls because I like them.
 
             builder.Services.AddSingleton<IAssettoCorsaService, AssettoCorsaService>(); // Add assetto corsa service.
+            builder.Services.AddSingleton<ICounterStrikeService, CounterStrikeService>(); // Add counter-strike service.
             // TODO: Add custom services.
         }
 
