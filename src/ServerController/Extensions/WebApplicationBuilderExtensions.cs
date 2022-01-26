@@ -24,7 +24,7 @@ namespace ServerController.Extensions
 
             builder.Services.AddSingleton<IAssettoCorsaService, AssettoCorsaService>(); // Add assetto corsa service.
             builder.Services.AddSingleton<ICounterStrikeService, CounterStrikeService>(); // Add counter-strike service.
-            // TODO: Add custom services.
+            builder.Services.AddSingleton<IValheimService, ValheimService>(); // Add valheim service.
         }
 
         /// <summary>
