@@ -18,7 +18,7 @@ namespace ServerController.Interfaces
         /// </summary>
         /// <param name="trackConfiguration">Nullable track configuration parameters.</param>
         /// <exception cref="InternalErrorException">Something went wrong with starting the server</exception>
-        void StartServer(TrackConfiguration? trackConfiguration);
+        Task StartServerAsync(TrackConfiguration? trackConfiguration);
         /// <summary>
         /// Method stops the server if it's running.
         /// </summary>
@@ -29,7 +29,7 @@ namespace ServerController.Interfaces
         /// </summary>
         /// <param name="trackConfiguration">Nullable track configuration parameters.</param>
         /// <exception cref="InternalErrorException">Something went wrong while restarting the server</exception>
-        void RestartServer(TrackConfiguration? trackConfiguration);
+        Task RestartServerAsync(TrackConfiguration? trackConfiguration);
 
     }
 }

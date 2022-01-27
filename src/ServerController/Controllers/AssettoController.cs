@@ -72,11 +72,11 @@ namespace ServerController.Controllers
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "AssettoCorsaStart")]
         [ProducesResponseType(typeof(InternalErrorResult), 500)]
-        public IActionResult Start([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] TrackConfiguration? trackConfiguration)
+        public async Task<IActionResult> Start([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] TrackConfiguration? trackConfiguration)
         {
             try
             {
-                _assettoCorsaService.StartServer(trackConfiguration);
+                await _assettoCorsaService.StartServerAsync(trackConfiguration);
                 return new OkResult();
             }
             catch (Exception ex)
@@ -100,11 +100,11 @@ namespace ServerController.Controllers
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "AssettoCorsaRestart")]
         [ProducesResponseType(typeof(InternalErrorResult), 500)]
-        public IActionResult Restart([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] TrackConfiguration? trackConfiguration)
+        public async Task<IActionResult> Restart([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] TrackConfiguration? trackConfiguration)
         {
             try
             {
-                _assettoCorsaService.RestartServer(trackConfiguration);
+                await _assettoCorsaService.RestartServerAsync(trackConfiguration);
                 return new OkResult();
             }
             catch (Exception ex)

@@ -38,6 +38,14 @@ namespace ServerController.Services
         /// </summary>
         private readonly string _serverProcessName;
         /// <summary>
+        /// Prevent concurrent configuration file edition.
+        /// </summary>
+        private readonly SemaphoreSlim _configFileLock;
+        /// <summary>
+        /// Timeout for configuration file edition.
+        /// </summary>
+        private const int ConfigFileLockTimeoutMs = 1000; // 1 second.
+        /// <summary>
         /// Private variable tracking the currently running server process.
         /// </summary>
         private Process? _serverProcess;
@@ -57,6 +65,8 @@ namespace ServerController.Services
             _serverConfigurationFilePath = Path.Combine(_serverRootDirectory, configuration.Value.ServerConfigurationFile);
 
             ValidateConfiguration(); // Validate configuration.
+
+            _configFileLock = new SemaphoreSlim(1);
         }
 
         /// <summary>
@@ -101,7 +111,7 @@ namespace ServerController.Services
         /// </summary>
         /// <param name="trackConfiguration">Nullable track configuration parameters.</param>
         /// <exception cref="InternalErrorException">Something went wrong with starting the server</exception>
-        public void StartServer(TrackConfiguration? trackConfiguration)
+        public async Task StartServerAsync(TrackConfiguration? trackConfiguration)
         {
             try
             {
@@ -114,7 +124,7 @@ namespace ServerController.Services
                 if (trackConfiguration != null)
                 {
                     _logger.LogDebug("Track configuration received.");
-                    UpdateServerTrackConfiguration(trackConfiguration.Track, trackConfiguration.Configuration);
+                    await UpdateServerTrackConfiguration(trackConfiguration.Track, trackConfiguration.Configuration);
                 }
 
                 _serverProcess?.Dispose(); // Dispose old process if it exists for some reason. Never should though.
@@ -177,10 +187,10 @@ namespace ServerController.Services
         /// </summary>
         /// <param name="trackConfiguration">Nullable track configuration parameters.</param>
         /// <exception cref="InternalErrorException">Something went wrong while restarting the server</exception>
-        public void RestartServer(TrackConfiguration? trackConfiguration)
+        public async Task RestartServerAsync(TrackConfiguration? trackConfiguration)
         {
             StopServer();
-            StartServer(trackConfiguration);
+            await StartServerAsync(trackConfiguration);
         }
 
         /// <summary>
@@ -227,22 +237,30 @@ namespace ServerController.Services
         /// </summary>
         /// <param name="track">Track to be set</param>
         /// <param name="configuration">Track configuration to be set</param>
+        /// <exception cref="FileLoadException">Configuration file was reserved and timeout was reached</exception>
         /// <exception cref="ArgumentException">Track configuration parameters were invalid</exception>
-        private void UpdateServerTrackConfiguration(string track, string? configuration)
+        private async Task UpdateServerTrackConfiguration(string track, string? configuration)
         {
             const string trackTag = "TRACK=";
             const string configTag = "CONFIG_TRACK=";
 
             _logger.LogDebug("Updating server track configuration");
 
+            var semaphoreReserved = false;
             try
             {
+                semaphoreReserved = await _configFileLock.WaitAsync(ConfigFileLockTimeoutMs);
+                if (!semaphoreReserved) // Entering semaphore timed out.
+                {
+                    throw new FileLoadException("Configuration file was reserved");
+                }
+
                 if (!ValidateTrackConfiguration(track, configuration))
                 {
                     throw new ArgumentException("Track configuration not valid.");
                 }
 
-                var configLines = File.ReadAllLines(_serverConfigurationFilePath); // Read all lines from the server configuration file..
+                var configLines = await File.ReadAllLinesAsync(_serverConfigurationFilePath); // Read all lines from the server configuration file..
 
                 var trackUpdated = false;
                 var trackConfigurationUpdated = false;
@@ -280,6 +298,13 @@ namespace ServerController.Services
             {
                 _logger.LogError(ex, "Exception occurred while updating track configuration");
                 throw; // Rethrow to caller.
+            }
+            finally
+            {
+                if (semaphoreReserved)
+                {
+                    _configFileLock.Release(); // Release the semaphore if it was entered.
+                }
             }
         }
 
