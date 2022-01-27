@@ -93,37 +93,7 @@ namespace ServerController.Services
         /// <returns>An enumerable list of all the available tracks and track configurations on the server.</returns>
         public IEnumerable<string> GetTracks()
         {
-            const string dataDirectoryName = "data";
-
-            _logger.LogDebug("Retrieving available tracks from server locations.");
-
-            var locatedTracks = new List<string>();
-
-            var subDirs = Directory.GetDirectories(_tracksDirectoryPath); // Get all subdirectories from tracks.
-
-            foreach (var subDir in subDirs) 
-            {
-                var trackName = new DirectoryInfo(subDir).Name; // Track name is the same as the directory name.
-                _logger.LogTrace("Track: {subDir}", subDir);
-                // Retrieve all track configurations. Track configurations are stored in the track directories subdirectories, with the exception of data directory:
-                var configs = Directory.GetDirectories(subDir).Where(c => new DirectoryInfo(c).Name != dataDirectoryName).ToArray();
-                if (configs.Any())
-                {
-                    _logger.LogTrace("Track contained subdirectories: {subDirs}", string.Join(", ", configs));
-                    // Track configurations found. Add track all track combinations to the return list.
-                    var trackConfigs = configs.Select(c => $"{trackName} {new DirectoryInfo(c).Name}");
-                    locatedTracks.AddRange(trackConfigs);
-                }
-                else
-                {
-                    _logger.LogTrace("Track contained no subdirectories");
-                    locatedTracks.Add(trackName);
-                }
-            }
-
-            _logger.LogInformation("Found {count} tracks on the server.", locatedTracks.Count);
-            _logger.LogDebug("Tracks: {tracks}", string.Join(", ", locatedTracks));
-            return locatedTracks;
+            return GetAvailableTracks();
         }
 
         /// <summary>
@@ -146,7 +116,7 @@ namespace ServerController.Services
                     _logger.LogDebug("Track configuration received.");
                     UpdateServerTrackConfiguration(trackConfiguration.Track, trackConfiguration.Configuration);
                 }
-                
+
                 _serverProcess?.Dispose(); // Dispose old process if it exists for some reason. Never should though.
                 _serverProcess = new Process
                 {
@@ -213,11 +183,123 @@ namespace ServerController.Services
             StartServer(trackConfiguration);
         }
 
+        /// <summary>
+        /// Method returns all available tracks on the server.
+        /// </summary>
+        /// <returns></returns>
+        private IEnumerable<string> GetAvailableTracks()
+        {
+            const string dataDirectoryName = "data";
 
+            _logger.LogDebug("Retrieving available tracks from server locations.");
+
+            var locatedTracks = new List<string>();
+
+            var subDirs = Directory.GetDirectories(_tracksDirectoryPath); // Get all subdirectories from tracks.
+
+            foreach (var subDir in subDirs)
+            {
+                var trackName = new DirectoryInfo(subDir).Name; // Track name is the same as the directory name.
+                _logger.LogTrace("Track: {subDir}", subDir);
+                // Retrieve all track configurations. Track configurations are stored in the track directories subdirectories, with the exception of data directory:
+                var configs = Directory.GetDirectories(subDir).Where(c => new DirectoryInfo(c).Name != dataDirectoryName).ToArray();
+                if (configs.Any())
+                {
+                    _logger.LogTrace("Track contained subdirectories: {subDirs}", string.Join(", ", configs));
+                    // Track configurations found. Add track all track combinations to the return list.
+                    var trackConfigs = configs.Select(c => $"{trackName} {new DirectoryInfo(c).Name}");
+                    locatedTracks.AddRange(trackConfigs);
+                }
+                else
+                {
+                    _logger.LogTrace("Track contained no subdirectories");
+                    locatedTracks.Add(trackName);
+                }
+            }
+
+            _logger.LogInformation("Found {count} tracks on the server.", locatedTracks.Count);
+            _logger.LogDebug("Tracks: {tracks}", string.Join(", ", locatedTracks));
+            return locatedTracks;
+        }
+
+        /// <summary>
+        /// Method updates the server configuration file with the given parameters.
+        /// </summary>
+        /// <param name="track">Track to be set</param>
+        /// <param name="configuration">Track configuration to be set</param>
+        /// <exception cref="ArgumentException">Track configuration parameters were invalid</exception>
         private void UpdateServerTrackConfiguration(string track, string? configuration)
         {
+            const string trackTag = "TRACK=";
+            const string configTag = "CONFIG_TRACK=";
+
             _logger.LogDebug("Updating server track configuration");
-            // TODO: Update track configuration.
+
+            try
+            {
+                if (!ValidateTrackConfiguration(track, configuration))
+                {
+                    throw new ArgumentException("Track configuration not valid.");
+                }
+
+                var configLines = File.ReadAllLines(_serverConfigurationFilePath); // Read all lines from the server configuration file..
+
+                var trackUpdated = false;
+                var trackConfigurationUpdated = false;
+                // Loop through the lines.
+                for (var i = 0; i < configLines.Length; i++)
+                {
+                    if (trackUpdated && trackConfigurationUpdated) // Both track and track configuration was updated.
+                    {
+                        _logger.LogTrace("Saving file changes.");
+                        File.WriteAllLines(_serverConfigurationFilePath, configLines); // Save the configuration file.
+                        _logger.LogDebug("Server configuration file saved.");
+                        break; // break the loop.
+                    }
+
+                    if (!trackUpdated && configLines[i].StartsWith(trackTag)) // See if track was not yet updated and the current line starts with the predetermined tag.
+                    {
+                        configLines[i] = trackTag + track; // TRACK=track 
+                        trackUpdated = true; // Set track as updated.
+                        _logger.LogDebug("Updated configuration file line with new track. Line value: {newLine}", configLines[i]);
+                        continue;
+                    }
+
+                    if (!trackConfigurationUpdated && configLines[i].StartsWith(configTag)) // See if the track configuration should be updated.
+                    {
+                        configLines[i] = configTag + configuration; // CONFIG_TAG=Configuration or CONFIG_TAG=
+                        trackConfigurationUpdated = true;
+                        _logger.LogDebug("Updated configuration file line with new track configuration. Line value: {newLine}", configLines[i]);
+                        continue;
+                    }
+                }
+
+                _logger.LogInformation("Server configuration file updated.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception occurred while updating track configuration");
+                throw; // Rethrow to caller.
+            }
+        }
+
+        /// <summary>
+        /// Method validates track configuration exists.
+        /// </summary>
+        /// <param name="track"></param>
+        /// <param name="config"></param>
+        /// <returns></returns>
+        private bool ValidateTrackConfiguration(string track, string? config)
+        {
+            var availableTracks = GetAvailableTracks(); // Get all available tracks.
+            var trackConfigurationString = string.IsNullOrEmpty(config) ? string.Empty : $" {config}"; // Track configuration is either empty or " config".
+
+            if (!availableTracks.Contains(track + trackConfigurationString))
+            {
+                _logger.LogError("Track or track configuration not available. Attempted configuration: '{conf}'", trackConfigurationString);
+                return false; // Track not available.
+            }
+            return true;
         }
     }
 }
