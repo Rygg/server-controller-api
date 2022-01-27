@@ -31,6 +31,7 @@ namespace ServerController.Extensions
             // Read configuration sections:
             builder.Services.Configure<AssettoCorsaConfigurationSection>(builder.Configuration.GetSection(AssettoCorsaConfigurationSection.DefaultConfigurationSectionName));
             builder.Services.Configure<CounterStrikeConfigurationSection>(builder.Configuration.GetSection(CounterStrikeConfigurationSection.DefaultConfigurationSectionName));
+            builder.Services.Configure<ValheimConfigurationSection>(builder.Configuration.GetSection(ValheimConfigurationSection.DefaultConfigurationSectionName));
         }
 
         /// <summary>

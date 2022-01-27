@@ -1,6 +1,7 @@
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using ServerController.Interfaces;
+using ServerController.Models;
 
 namespace ServerController.Controllers
 {
@@ -39,17 +40,18 @@ namespace ServerController.Controllers
         /// <response code="405">Method not allowed</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "ValheimStart")]
-        public async Task<IActionResult> Start()
+        [ProducesResponseType(typeof(InternalErrorResult), 500)]
+        public IActionResult Start()
         {
             try
             {
-                await _valheimService.StartServer();
+                _valheimService.StartServer();
                 return new OkResult();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred while starting the Valheim server");
-                return new ObjectResult(ex.Message) 
+                return new ObjectResult(new InternalErrorResult { Message = ex.Message, Reason = ex.InnerException?.Message }) 
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
                 };
@@ -64,17 +66,18 @@ namespace ServerController.Controllers
         /// <response code="405">Method not allowed</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "ValheimStop")]
+        [ProducesResponseType(typeof(InternalErrorResult), 500)]
         public async Task<IActionResult> Stop()
         {
             try
             {
-                await _valheimService.StopServer();
+                await _valheimService.StopServerAsync();
                 return new OkResult();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred while stopping the Valheim server");
-                return new ObjectResult(ex.Message)
+                return new ObjectResult(new InternalErrorResult { Message = ex.Message, Reason = ex.InnerException?.Message })
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
                 };

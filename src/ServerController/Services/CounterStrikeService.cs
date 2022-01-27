@@ -25,7 +25,7 @@ namespace ServerController.Services
         /// </summary>
         private readonly string _serverExecutablePath;
         /// <summary>
-        /// Server process name from injected configuration.
+        /// Server launch arguments from injected configuration.
         /// </summary>
         private readonly string _serverLaunchArguments;
         /// <summary>

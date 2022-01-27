@@ -1,4 +1,6 @@
-﻿namespace ServerController.Interfaces
+﻿using ServerController.Exceptions;
+
+namespace ServerController.Interfaces
 {
     /// <summary>
     /// Interface for ValheimServices
@@ -6,14 +8,14 @@
     public interface IValheimService
     {
         /// <summary>
-        /// Starts the server.
+        /// Method starts the server.
         /// </summary>
-        /// <returns>Task representing the operation.</returns>
-        Task StartServer();
+        /// <exception cref="InternalErrorException">Something went wrong with starting the server</exception>
+        void StartServer();
         /// <summary>
-        /// Stops the server.
+        /// Method stops the server if it's running.
         /// </summary>
-        /// <returns>Task representing the operation.</returns>
-        Task StopServer();
+        /// <exception cref="InternalErrorException">Something went wrong with stopping the server</exception>
+        Task StopServerAsync();
     }
 }
