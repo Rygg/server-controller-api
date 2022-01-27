@@ -49,5 +49,26 @@ namespace ServerController.Utility
             }
             return false; // Server is not running.
         }
+        
+        /// <summary>
+        /// Method stops the server process given as the parameter.
+        /// </summary>
+        /// <param name="serverProcess">Server process to be stopped.</param>
+        /// <param name="logger">Logger.</param>
+        /// <returns></returns>
+        internal static async Task StopServerProcess(Process? serverProcess, ILogger logger)
+        {
+            if (serverProcess == null)
+            {
+                throw new ArgumentNullException(nameof(serverProcess), "Server process was null.");
+            }
+
+            logger.LogDebug("Stopping server.");
+            logger.LogDebug("Killing process with PID: {pId}", serverProcess.Id); // Process is not null.
+            serverProcess.Kill();
+            logger.LogTrace("Kill signal sent.");
+            await serverProcess.WaitForExitAsync();
+            logger.LogDebug("Process has stopped.");
+        }
     }
 }

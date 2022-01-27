@@ -1,6 +1,7 @@
 using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using ServerController.Interfaces;
+using ServerController.Models;
 
 namespace ServerController.Controllers
 {
@@ -39,17 +40,18 @@ namespace ServerController.Controllers
         /// <response code="405">Method not allowed</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "CounterStrikeStart")]
-        public async Task<IActionResult> Start()
+        [ProducesResponseType(typeof(InternalErrorResult), 500)]
+        public IActionResult Start()
         {
             try
             {
-                await _counterStrikeService.StartServer();
+                _counterStrikeService.StartServer();
                 return new OkResult();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred while starting the Counter-Strike server");
-                return new ObjectResult(ex.Message) 
+                return new ObjectResult(new InternalErrorResult { Message = ex.Message, Reason = ex.InnerException?.Message })
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
                 };
@@ -64,17 +66,18 @@ namespace ServerController.Controllers
         /// <response code="405">Method not allowed</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "CounterStrikeStop")]
+        [ProducesResponseType(typeof(InternalErrorResult), 500)]
         public async Task<IActionResult> Stop()
         {
             try
             {
-                await _counterStrikeService.StopServer();
+                await _counterStrikeService.StopServerAsync();
                 return new OkResult();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred while stopping the Counter-Strike server");
-                return new ObjectResult(ex.Message)
+                return new ObjectResult(new InternalErrorResult { Message = ex.Message, Reason = ex.InnerException?.Message })
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
                 };

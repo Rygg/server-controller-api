@@ -28,7 +28,9 @@ namespace ServerController.Extensions
             builder.Services.AddSingleton<IValheimService, ValheimService>(); // Add valheim service.
 
             builder.Services.AddOptions(); // Add options functionality.
-            builder.Services.Configure<AssettoCorsaConfigurationSection>(builder.Configuration.GetSection(AssettoCorsaConfigurationSection.DefaultConfigurationSectionName)); // Read AC configuration.
+            // Read configuration sections:
+            builder.Services.Configure<AssettoCorsaConfigurationSection>(builder.Configuration.GetSection(AssettoCorsaConfigurationSection.DefaultConfigurationSectionName));
+            builder.Services.Configure<CounterStrikeConfigurationSection>(builder.Configuration.GetSection(CounterStrikeConfigurationSection.DefaultConfigurationSectionName));
         }
 
         /// <summary>
