@@ -23,7 +23,7 @@ namespace ServerController.Interfaces
         /// Method stops the server if it's running.
         /// </summary>
         /// <exception cref="InternalErrorException">Something went wrong with starting the server</exception>
-        void StopServer();
+        Task StopServerAsync();
         /// <summary>
         /// Method first stops the server if it's running and then starts the server with optional track configuration parameters.
         /// </summary>

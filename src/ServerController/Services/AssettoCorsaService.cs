@@ -153,7 +153,7 @@ namespace ServerController.Services
         /// Method stops the server if it's running.
         /// </summary>
         /// <exception cref="InternalErrorException">Something went wrong with starting the server</exception>
-        public void StopServer()
+        public async Task StopServerAsync()
         {
             try
             {
@@ -168,7 +168,7 @@ namespace ServerController.Services
                 _logger.LogDebug("Killing process with PID: {pId}", _serverProcess!.Id); // Process is not null.
                 _serverProcess.Kill();
                 _logger.LogTrace("Kill signal sent.");
-                _serverProcess.WaitForExit();
+                await _serverProcess.WaitForExitAsync();
                 _logger.LogDebug("Process has stopped.");
 
                 _serverProcess.Dispose(); // Dispose the process.
@@ -189,7 +189,7 @@ namespace ServerController.Services
         /// <exception cref="InternalErrorException">Something went wrong while restarting the server</exception>
         public async Task RestartServerAsync(TrackConfiguration? trackConfiguration)
         {
-            StopServer();
+            await StopServerAsync();
             await StartServerAsync(trackConfiguration);
         }
 

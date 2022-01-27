@@ -126,11 +126,11 @@ namespace ServerController.Controllers
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "AssettoCorsaStop")]
         [ProducesResponseType(typeof(InternalErrorResult), 500)]
-        public IActionResult Stop()
+        public async Task<IActionResult> Stop()
         {
             try
             {
-                _assettoCorsaService.StopServer();
+                await _assettoCorsaService.StopServerAsync();
                 return new OkResult();
             }
             catch (Exception ex)
