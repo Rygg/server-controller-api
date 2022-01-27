@@ -2,6 +2,7 @@ using System.Net;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using ServerController.Interfaces;
+using ServerController.Models;
 using ServerController.Models.AssettoController;
 
 namespace ServerController.Controllers
@@ -41,6 +42,7 @@ namespace ServerController.Controllers
         /// <response code="500">Internal server error</response>
         [HttpGet(Name = "AssettoCorsaTracks")]
         [ProducesResponseType(typeof(IEnumerable<string>), 200)]
+        [ProducesResponseType(typeof(InternalErrorResult), 500)]
         public IActionResult Tracks()
         {
             try
@@ -52,7 +54,7 @@ namespace ServerController.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Exception occurred while retrieving tracks.");
-                return new ObjectResult(ex.Message)
+                return new ObjectResult(new InternalErrorResult { Message = ex.Message, Reason = ex.InnerException?.Message})
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
                 };
@@ -69,6 +71,7 @@ namespace ServerController.Controllers
         /// <response code="405">Method not allowed</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "AssettoCorsaStart")]
+        [ProducesResponseType(typeof(InternalErrorResult), 500)]
         public IActionResult Start([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] TrackConfiguration? trackConfiguration)
         {
             try
@@ -79,7 +82,7 @@ namespace ServerController.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred while starting the Assetto Corsa server");
-                return new ObjectResult(ex.Message) 
+                return new ObjectResult(new InternalErrorResult { Message = ex.Message, Reason = ex.InnerException?.Message }) 
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
                 };
@@ -96,6 +99,7 @@ namespace ServerController.Controllers
         /// <response code="405">Method not allowed</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "AssettoCorsaRestart")]
+        [ProducesResponseType(typeof(InternalErrorResult), 500)]
         public IActionResult Restart([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] TrackConfiguration? trackConfiguration)
         {
             try
@@ -106,7 +110,7 @@ namespace ServerController.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred while restarting the Assetto Corsa server");
-                return new ObjectResult(ex.Message)
+                return new ObjectResult(new InternalErrorResult { Message = ex.Message, Reason = ex.InnerException?.Message })
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
                 };
@@ -121,6 +125,7 @@ namespace ServerController.Controllers
         /// <response code="405">Method not allowed</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "AssettoCorsaStop")]
+        [ProducesResponseType(typeof(InternalErrorResult), 500)]
         public IActionResult Stop()
         {
             try
@@ -131,7 +136,7 @@ namespace ServerController.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Exception occurred while stopping the Assetto Corsa server");
-                return new ObjectResult(ex.Message)
+                return new ObjectResult(new InternalErrorResult { Message = ex.Message, Reason = ex.InnerException?.Message })
                 {
                     StatusCode = (int)HttpStatusCode.InternalServerError,
                 };
