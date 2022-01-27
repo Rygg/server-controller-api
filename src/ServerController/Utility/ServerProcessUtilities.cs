@@ -49,6 +49,33 @@ namespace ServerController.Utility
             }
             return false; // Server is not running.
         }
+
+        /// <summary>
+        /// Method disposes the old serverProcess, creates a new process and signals for it to start.
+        /// </summary>
+        /// <param name="serverProcess">ServerProcess variable as a reference parameter.</param>
+        /// <param name="logger">Logger</param>
+        /// <param name="fileName">Process path to be started.</param>
+        /// <param name="workingDirectory">Working directory for the process</param>
+        /// <param name="arguments">Optional nullable launch arguments for the process</param>
+        internal static void StartServerProcess(ref Process? serverProcess, ILogger logger, string fileName, string workingDirectory, string? arguments = null)
+        {
+            serverProcess?.Dispose(); // Dispose old process if it exists.
+            serverProcess = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = fileName,
+                    WorkingDirectory = workingDirectory,
+                    Arguments = arguments,
+                    UseShellExecute = false, // Don't shell execute.
+                    CreateNoWindow = true, // No windows.
+                }
+            };
+            logger.LogDebug("Starting new server process.");
+            serverProcess.Start();
+            logger.LogInformation("Server started with PID: {pId}", serverProcess.Id);
+        }
         
         /// <summary>
         /// Method stops the server process given as the parameter.

@@ -85,21 +85,7 @@ namespace ServerController.Services
                     throw new InvalidOperationException("Server already running!");
                 }
 
-                _serverProcess?.Dispose(); // Dispose old process if it exists for some reason. Never should though.
-                _serverProcess = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = _serverExecutablePath,
-                        Arguments = _serverLaunchArguments,
-                        WorkingDirectory = _serverRootDirectory,
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                    }
-                };
-                _logger.LogDebug("Starting new server process.");
-                _serverProcess.Start();
-                _logger.LogInformation("Server started with PID: {pId}", _serverProcess.Id);
+                ServerProcessUtilities.StartServerProcess(ref _serverProcess, _logger, _serverExecutablePath, _serverRootDirectory, _serverLaunchArguments);
             }
             catch (Exception ex)
             {

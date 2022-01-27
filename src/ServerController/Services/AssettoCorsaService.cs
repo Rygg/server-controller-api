@@ -127,20 +127,7 @@ namespace ServerController.Services
                     await UpdateServerTrackConfiguration(trackConfiguration.Track, trackConfiguration.Configuration);
                 }
 
-                _serverProcess?.Dispose(); // Dispose old process if it exists for some reason. Never should though.
-                _serverProcess = new Process
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = _serverExecutablePath,
-                        WorkingDirectory = _serverRootDirectory,
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                    }
-                };
-                _logger.LogDebug("Starting new server process.");
-                _serverProcess.Start();
-                _logger.LogInformation("Server started with PID: {pId}", _serverProcess.Id);
+                ServerProcessUtilities.StartServerProcess(ref _serverProcess, _logger, _serverExecutablePath, _serverRootDirectory);
             }
             catch (Exception ex)
             {
