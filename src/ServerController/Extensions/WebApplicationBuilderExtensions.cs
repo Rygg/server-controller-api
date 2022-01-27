@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.OpenApi.Models;
 using Serilog;
+using ServerController.Configuration;
 using ServerController.Interfaces;
 using ServerController.Services;
 
@@ -25,6 +26,9 @@ namespace ServerController.Extensions
             builder.Services.AddSingleton<IAssettoCorsaService, AssettoCorsaService>(); // Add assetto corsa service.
             builder.Services.AddSingleton<ICounterStrikeService, CounterStrikeService>(); // Add counter-strike service.
             builder.Services.AddSingleton<IValheimService, ValheimService>(); // Add valheim service.
+
+            builder.Services.AddOptions(); // Add options functionality.
+            builder.Services.Configure<AssettoCorsaConfigurationSection>(builder.Configuration.GetSection(AssettoCorsaConfigurationSection.DefaultConfigurationSectionName)); // Read AC configuration.
         }
 
         /// <summary>
@@ -46,7 +50,8 @@ namespace ServerController.Extensions
             // Configure http logging.
             builder.Services.AddHttpLogging(logging =>
             {
-                logging.LoggingFields = HttpLoggingFields.RequestPath | HttpLoggingFields.RequestBody | HttpLoggingFields.RequestMethod;
+                logging.LoggingFields = HttpLoggingFields.RequestPath | HttpLoggingFields.RequestBody | HttpLoggingFields.RequestMethod | 
+                                        HttpLoggingFields.ResponseStatusCode | HttpLoggingFields.ResponseBody;
             });
         }
 

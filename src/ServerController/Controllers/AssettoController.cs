@@ -41,12 +41,12 @@ namespace ServerController.Controllers
         /// <response code="500">Internal server error</response>
         [HttpGet(Name = "AssettoCorsaTracks")]
         [ProducesResponseType(typeof(IEnumerable<string>), 200)]
-        public async Task<IActionResult> Tracks()
+        public IActionResult Tracks()
         {
             try
             {
                 _logger.LogDebug("Retrieving tracks from service");
-                var tracks = await _assettoCorsaService.GetTracksAsync();
+                var tracks = _assettoCorsaService.GetTracks();
                 return new OkObjectResult(tracks);
             }
             catch (Exception ex)
@@ -69,11 +69,11 @@ namespace ServerController.Controllers
         /// <response code="405">Method not allowed</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "AssettoCorsaStart")]
-        public async Task<IActionResult> Start([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] TrackConfiguration? trackConfiguration)
+        public IActionResult Start([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] TrackConfiguration? trackConfiguration)
         {
             try
             {
-                await _assettoCorsaService.StartServer(trackConfiguration);
+                _assettoCorsaService.StartServer(trackConfiguration);
                 return new OkResult();
             }
             catch (Exception ex)
@@ -96,11 +96,11 @@ namespace ServerController.Controllers
         /// <response code="405">Method not allowed</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "AssettoCorsaRestart")]
-        public async Task<IActionResult> Restart([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] TrackConfiguration? trackConfiguration)
+        public IActionResult Restart([FromBody(EmptyBodyBehavior = EmptyBodyBehavior.Allow)] TrackConfiguration? trackConfiguration)
         {
             try
             {
-                await _assettoCorsaService.RestartServer(trackConfiguration);
+                _assettoCorsaService.RestartServer(trackConfiguration);
                 return new OkResult();
             }
             catch (Exception ex)
@@ -121,11 +121,11 @@ namespace ServerController.Controllers
         /// <response code="405">Method not allowed</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "AssettoCorsaStop")]
-        public async Task<IActionResult> Stop()
+        public IActionResult Stop()
         {
             try
             {
-                await _assettoCorsaService.StopServer();
+                _assettoCorsaService.StopServer();
                 return new OkResult();
             }
             catch (Exception ex)

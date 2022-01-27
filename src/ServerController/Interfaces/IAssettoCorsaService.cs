@@ -1,4 +1,5 @@
-﻿using ServerController.Models.AssettoController;
+﻿using ServerController.Exceptions;
+using ServerController.Models.AssettoController;
 
 namespace ServerController.Interfaces
 {
@@ -8,26 +9,27 @@ namespace ServerController.Interfaces
     public interface IAssettoCorsaService
     {
         /// <summary>
-        /// Retrieve all available tracks on the server.
+        /// Method retrieves all the available tracks on the server.
         /// </summary>
-        /// <returns>A list of all available tracks and track configurations on the server.</returns>
-        Task<IEnumerable<string>> GetTracksAsync();
+        /// <returns>An enumerable list of all the available tracks and track configurations on the server.</returns>
+        IEnumerable<string> GetTracks();
         /// <summary>
-        /// Start the server with optional track configuration parameters.
+        /// Method starts the server with optional track configuration parameters.
         /// </summary>
         /// <param name="trackConfiguration">Nullable track configuration parameters.</param>
-        /// <returns>Task representing the operation.</returns>
-        Task StartServer(TrackConfiguration? trackConfiguration);
+        /// <exception cref="InternalErrorException">Something went wrong with starting the server</exception>
+        void StartServer(TrackConfiguration? trackConfiguration);
         /// <summary>
-        /// Stops and starts the server with optional track configuration parameters.
+        /// Method stops the server if it's running.
+        /// </summary>
+        /// <exception cref="InternalErrorException">Something went wrong with starting the server</exception>
+        void StopServer();
+        /// <summary>
+        /// Method first stops the server if it's running and then starts the server with optional track configuration parameters.
         /// </summary>
         /// <param name="trackConfiguration">Nullable track configuration parameters.</param>
-        /// <returns>Task representing the operation.</returns>
-        Task RestartServer(TrackConfiguration? trackConfiguration);
-        /// <summary>
-        /// Stops the server.
-        /// </summary>
-        /// <returns>Task representing the operation.</returns>
-        Task StopServer();
+        /// <exception cref="InternalErrorException">Something went wrong while restarting the server</exception>
+        void RestartServer(TrackConfiguration? trackConfiguration);
+
     }
 }
