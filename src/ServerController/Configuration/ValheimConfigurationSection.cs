@@ -27,5 +27,10 @@
         /// Process launch arguments.
         /// </summary>
         public string LaunchArguments { get; set; } = "-nographics";
+
+        /// <summary>
+        /// Directory containing worlds present on the server.
+        /// </summary>
+        public string ServerWorldDirectory { get; set; } = string.Empty;
     }
 }

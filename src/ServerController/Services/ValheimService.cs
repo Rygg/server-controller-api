@@ -33,6 +33,19 @@ namespace ServerController.Services
         /// </summary>
         private readonly string _serverProcessName;
         /// <summary>
+        /// Directory containing the server worlds from injected configuration.
+        /// </summary>
+        private readonly string _serverWorldDirectory;
+        /// <summary>
+        /// Prevent concurrent configuration world file backups.
+        /// </summary>
+        private readonly SemaphoreSlim _worldBackupLock;
+        /// <summary>
+        /// Timeout for world backup lock.
+        /// </summary>
+        private const int ConfigFileLockTimeoutMs = 1000; // 1 second.
+
+        /// <summary>
         /// Private variable tracking the currently running server process.
         /// </summary>
         private Process? _serverProcess;
@@ -49,8 +62,11 @@ namespace ServerController.Services
             _serverExecutablePath = Path.Combine(_serverRootDirectory, configuration.Value.ProcessExecutable);
             _serverLaunchArguments = configuration.Value.LaunchArguments;
             _serverProcessName = configuration.Value.ProcessName;
+            _serverWorldDirectory = configuration.Value.ServerWorldDirectory;
 
             ValidateConfiguration(); // Validate configuration.
+
+            _worldBackupLock = new SemaphoreSlim(1);
         }
 
         /// <summary>
@@ -68,6 +84,11 @@ namespace ServerController.Services
             {
                 _logger.LogError("Server executable file '{exe}' not found", _serverExecutablePath);
                 throw new ConfigurationException("Server executable file not located.");
+            }
+            if (!Directory.Exists(_serverWorldDirectory))
+            {
+                _logger.LogError("Server world directory '{worlds}' not found", _serverWorldDirectory);
+                throw new ConfigurationException("Server world directory not located.");
             }
         }
 
@@ -107,7 +128,7 @@ namespace ServerController.Services
                     return;
                 }
 
-                BackupServerWorldFiles(); // Back up the worlds before stopping the server.
+                await BackupServerWorldFiles(); // Back up the worlds before stopping the server.
 
                 await ServerProcessUtilities.StopServerProcess(_serverProcess, _logger);
 
@@ -125,10 +146,76 @@ namespace ServerController.Services
 
         /// <summary>
         /// Method makes a couple of backups of the worlds, in case the server is randomly writing the world while the kill command is initiated or some copying is being performed.
+        /// <remarks>This is required to prevent loss of world progression by killing the process in the middle of world saving.</remarks>
         /// </summary>
-        private void BackupServerWorldFiles()
+        private async Task BackupServerWorldFiles()
         {
-            // TODO: Backup world files.
+            const int delayBetweenCopiesMs = 5000;
+
+            const string backupDirectoryName = "worlds_backup1";
+            const string backupDirectoryName2 = "worlds_backup2";
+
+            var semaphoreEntered = false;
+            try
+            {
+                semaphoreEntered = await _worldBackupLock.WaitAsync(ConfigFileLockTimeoutMs);
+                if (!semaphoreEntered)
+                {
+                    throw new FileLoadException("World files were already being backed up");
+                }
+
+                var di = new DirectoryInfo(_serverWorldDirectory);
+                if (di.Parent == null)
+                {
+                    _logger.LogError("Worlds directory did not contain a parent directory. Cannot perform server backup.");
+                    throw new ArgumentException("Invalid folder structure.");
+                }
+                var backupDirectory1 = Path.Combine(di.Parent.FullName, backupDirectoryName);
+                var backupDirectory2 = Path.Combine(di.Parent.FullName, backupDirectoryName2);
+
+                if (!Directory.Exists(backupDirectory1))
+                {
+                    Directory.CreateDirectory(backupDirectory1);
+                }
+                if (!Directory.Exists(backupDirectory2))
+                {
+                    Directory.CreateDirectory(backupDirectory2);
+                }
+
+                var dirFilePaths = Directory.GetFiles(_serverWorldDirectory); // Get all the world files.
+                _logger.LogDebug("Performing the first cycle of world backups.");
+                foreach (var file in dirFilePaths)
+                {
+                    var targetPath = Path.Combine(backupDirectory1, Path.GetFileName(file));
+                    _logger.LogTrace("Starting to copy {oldFile} to {newFile}", file, targetPath);
+                    File.Copy(file, targetPath, true);
+                }
+                _logger.LogDebug("First backup cycle done.");
+                _logger.LogDebug("Waiting {delay}ms to prevent world copying issues.", delayBetweenCopiesMs);
+                await Task.Delay(delayBetweenCopiesMs);
+
+                _logger.LogDebug("Performing the second cycle of world backups.");
+                foreach (var file in dirFilePaths)
+                {
+                    var targetPath = Path.Combine(backupDirectory2, Path.GetFileName(file));
+                    _logger.LogTrace("Starting to copy {oldFile} to {newFile}", file, targetPath);
+                    File.Copy(file, targetPath, true);
+                }
+                _logger.LogDebug("Second backup cycle done.");
+                _logger.LogInformation("Worlds backed up.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Exception occurred while backing up the world files");
+                throw; // Rethrow to caller.
+            }
+            finally
+            {
+                if (semaphoreEntered)
+                {
+                    _worldBackupLock.Release(); // Release the semaphore if it was entered.
+                }
+            }
         }
     }
 }
