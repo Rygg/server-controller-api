@@ -33,6 +33,10 @@ namespace ServerController.Services
         /// </summary>
         private readonly string _serverProcessName;
         /// <summary>
+        /// Should worlds be backed up on service close. Injected from configuration.
+        /// </summary>
+        private readonly bool _backupWorldsOnClose;
+        /// <summary>
         /// Directory containing the server worlds from injected configuration.
         /// </summary>
         private readonly string _serverWorldDirectory;
@@ -63,6 +67,7 @@ namespace ServerController.Services
             _serverLaunchArguments = configuration.Value.LaunchArguments;
             _serverProcessName = configuration.Value.ProcessName;
             _serverWorldDirectory = configuration.Value.ServerWorldDirectory;
+            _backupWorldsOnClose = configuration.Value.BackupWorldsOnClose;
 
             ValidateConfiguration(); // Validate configuration.
 
@@ -84,11 +89,6 @@ namespace ServerController.Services
             {
                 _logger.LogError("Server executable file '{exe}' not found", _serverExecutablePath);
                 throw new ConfigurationException("Server executable file not located.");
-            }
-            if (!Directory.Exists(_serverWorldDirectory))
-            {
-                _logger.LogError("Server world directory '{worlds}' not found", _serverWorldDirectory);
-                throw new ConfigurationException("Server world directory not located.");
             }
         }
 
@@ -128,7 +128,10 @@ namespace ServerController.Services
                     return;
                 }
 
-                await BackupServerWorldFiles(); // Back up the worlds before stopping the server.
+                if (_backupWorldsOnClose)
+                {
+                    await BackupServerWorldFiles(); // Back up the worlds before stopping the server.
+                }
 
                 await ServerProcessUtilities.StopServerProcess(_serverProcess, _logger);
 
@@ -154,6 +157,12 @@ namespace ServerController.Services
 
             const string backupDirectoryName = "worlds_backup1";
             const string backupDirectoryName2 = "worlds_backup2";
+
+            if (!Directory.Exists(_serverWorldDirectory))
+            {
+                _logger.LogError("Server world directory '{worlds}' not found", _serverWorldDirectory);
+                throw new ConfigurationException("Server world directory not located.");
+            }
 
             var semaphoreEntered = false;
             try

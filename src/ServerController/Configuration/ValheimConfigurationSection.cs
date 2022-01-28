@@ -27,6 +27,10 @@
         /// Process launch arguments.
         /// </summary>
         public string LaunchArguments { get; set; } = "-nographics";
+        /// <summary>
+        /// Should worlds be backed up when closing
+        /// </summary>
+        public bool BackupWorldsOnClose { get; set; }
 
         /// <summary>
         /// Directory containing worlds present on the server.
