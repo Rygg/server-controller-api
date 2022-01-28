@@ -300,9 +300,10 @@ namespace ServerController.Services
             var availableTracks = GetAvailableTracks(); // Get all available tracks.
             var trackConfigurationString = string.IsNullOrEmpty(config) ? string.Empty : $" {config}"; // Track configuration is either empty or " config".
 
-            if (!availableTracks.Contains(track + trackConfigurationString))
+            var attempt = track + trackConfigurationString;
+            if (!availableTracks.Contains(attempt))
             {
-                _logger.LogError("Track or track configuration not available. Attempted configuration: '{conf}'", trackConfigurationString);
+                _logger.LogError("Track or track configuration not available. Attempted configuration: '{conf}'", attempt);
                 return false; // Track not available.
             }
             return true;
