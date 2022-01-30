@@ -1,4 +1,5 @@
 using ServerController.Extensions;
+using ServerController.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args); // Create the builder.
 builder.ConfigureServices(); // Configure services.
@@ -11,6 +12,10 @@ if (app.Environment.IsDevelopment()) // Set development environment specific opt
 {
     app.UseSwagger(); // Use swagger in development.
     app.UseSwaggerUI();
+}
+else
+{
+    app.UseMiddleware<ApiKeyMiddleware>(); // API keys are not required in development.
 }
 
 app.UseHttpLogging(); // Use the configured http logging.

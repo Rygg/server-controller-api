@@ -27,11 +27,11 @@ namespace ServerController.Extensions
             builder.Services.AddSingleton<ICounterStrikeService, CounterStrikeService>(); // Add counter-strike service.
             builder.Services.AddSingleton<IValheimService, ValheimService>(); // Add valheim service.
 
-            builder.Services.AddOptions(); // Add options functionality.
-            // Read configuration sections:
+            builder.Services.AddOptions(); // Add options functionality and read configuration sections.
             builder.Services.Configure<AssettoCorsaConfigurationSection>(builder.Configuration.GetSection(AssettoCorsaConfigurationSection.DefaultConfigurationSectionName));
             builder.Services.Configure<CounterStrikeConfigurationSection>(builder.Configuration.GetSection(CounterStrikeConfigurationSection.DefaultConfigurationSectionName));
             builder.Services.Configure<ValheimConfigurationSection>(builder.Configuration.GetSection(ValheimConfigurationSection.DefaultConfigurationSectionName));
+            builder.Services.Configure<List<AllowedClientsConfigurationSection>>(builder.Configuration.GetSection(AllowedClientsConfigurationSection.DefaultConfigurationSectionName));
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace ServerController.Extensions
                     Description = "Web API to control multiple game servers located on the server. Implemented using ASP.NET Core 6.",
                 });
                 
-                // using System.Reflection: Get generated xml documentation and include it in the swagger generation options.
+                // Using System.Reflection: Get generated xml documentation and include it in the swagger generation options.
                 var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
                 options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
             });

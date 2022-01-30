@@ -39,6 +39,7 @@ namespace ServerController.Controllers
         /// </summary>
         /// <returns></returns>
         /// <response code="200">All available track names and track combinations.</response>
+        /// <response code="401">Client was unauthorized</response>
         /// <response code="500">Internal server error</response>
         [HttpGet(Name = "AssettoCorsaTracks")]
         [ProducesResponseType(typeof(IEnumerable<string>), 200)]
@@ -68,6 +69,7 @@ namespace ServerController.Controllers
         /// <returns></returns>
         /// <response code="200">Server was successfully started.</response>
         /// <response code="400">Bad request</response>
+        /// <response code="401">Client was unauthorized</response>
         /// <response code="405">Method not allowed</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "AssettoCorsaStart")]
@@ -96,6 +98,7 @@ namespace ServerController.Controllers
         /// <returns></returns>
         /// <response code="200">Server was successfully restarted.</response>
         /// <response code="400">Bad request</response>
+        /// <response code="401">Client was unauthorized</response>
         /// <response code="405">Method not allowed</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "AssettoCorsaRestart")]
@@ -122,6 +125,7 @@ namespace ServerController.Controllers
         /// </summary>
         /// <returns></returns>
         /// <response code="200">Server was successfully stopped.</response>
+        /// <response code="401">Client was unauthorized</response>
         /// <response code="405">Method not allowed</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "AssettoCorsaStop")]

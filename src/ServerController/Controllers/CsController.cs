@@ -37,6 +37,7 @@ namespace ServerController.Controllers
         /// </summary>
         /// <returns></returns>
         /// <response code="200">Server was successfully started.</response>
+        /// <response code="401">Client was unauthorized</response>
         /// <response code="405">Method not allowed</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "CounterStrikeStart")]
@@ -57,12 +58,13 @@ namespace ServerController.Controllers
                 };
             }
         }
-        
+
         /// <summary>
         /// Endpoint stops the CS:GO server if it is running.
         /// </summary>
         /// <returns></returns>
         /// <response code="200">Server was successfully stopped.</response>
+        /// <response code="401">Client was unauthorized</response>
         /// <response code="405">Method not allowed</response>
         /// <response code="500">Internal server error</response>
         [HttpPost(Name = "CounterStrikeStop")]
