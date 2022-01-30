@@ -31,7 +31,7 @@ namespace ServerController.Utility
                         logger.LogWarning("Multiple running processes found. PIDs: {pIds} ", string.Join(", ", processes.Select(p => p.Id)));
                         logger.LogWarning("Selecting the first process.");
                     }
-                    logger.LogInformation("Assigning server process with PID {pId} to memory.", processes[0]);
+                    logger.LogInformation("Assigning server process with PID {pId} to memory.", processes[0].Id);
                     serverProcess = processes[0];
                 }
                 else
