@@ -31,7 +31,7 @@ namespace ServerController.Extensions
             builder.Services.Configure<AssettoCorsaConfigurationSection>(builder.Configuration.GetSection(AssettoCorsaConfigurationSection.DefaultConfigurationSectionName));
             builder.Services.Configure<CounterStrikeConfigurationSection>(builder.Configuration.GetSection(CounterStrikeConfigurationSection.DefaultConfigurationSectionName));
             builder.Services.Configure<ValheimConfigurationSection>(builder.Configuration.GetSection(ValheimConfigurationSection.DefaultConfigurationSectionName));
-            builder.Services.Configure<List<AllowedClientsConfigurationSection>>(builder.Configuration.GetSection(AllowedClientsConfigurationSection.DefaultConfigurationSectionName));
+            builder.Services.Configure<List<ApplicationClientsConfigurationSection>>(builder.Configuration.GetSection(ApplicationClientsConfigurationSection.DefaultConfigurationSectionName));
         }
 
         /// <summary>

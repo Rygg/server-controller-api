@@ -34,7 +34,7 @@ namespace ServerController.Middlewares
         /// <param name="next">The next request delegate</param>
         /// <param name="configuration">Injected configuration</param>
         /// <param name="logger">Injected logger</param>
-        public ApiKeyMiddleware(RequestDelegate next, ILogger<ApiKeyMiddleware> logger, IOptions<List<AllowedClientsConfigurationSection>> configuration)
+        public ApiKeyMiddleware(RequestDelegate next, ILogger<ApiKeyMiddleware> logger, IOptions<List<ApplicationClientsConfigurationSection>> configuration)
         {
             _next = next;
             _logger = logger;
@@ -84,7 +84,7 @@ namespace ServerController.Middlewares
                 var hashedApiSecret = HashApiKey(appSecret);
                 if (extractedApiKey == hashedApiSecret)
                 {
-                    _logger.LogInformation("Valid api key in request. Api key owner: {appName}", appName);
+                    _logger.LogDebug("Valid ApiKey. Owner application: {appName}", appName);
                     return true;
                 }
             }

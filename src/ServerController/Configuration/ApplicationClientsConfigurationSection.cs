@@ -3,12 +3,12 @@
     /// <summary>
     /// Class model for allowed APIs configuration section.
     /// </summary>
-    public class AllowedClientsConfigurationSection
+    public class ApplicationClientsConfigurationSection
     {
         /// <summary>
         /// Default ConfigurationSection name where the configuration should be.
         /// </summary>
-        public const string DefaultConfigurationSectionName = "AllowedClients";
+        public const string DefaultConfigurationSectionName = "Clients";
 
         /// <summary>
         /// Name of the client for logging purposes.
